@@ -1,0 +1,11 @@
+---
+# file: vars/wotlk
+install_mysql: true
+
+wow_directory: /vagrant/World of Warcraft
+mangos_directory: /vagrant/mangos-wotlk
+db_directory: /vagrant/wotlk-db
+
+mangos_database_name: wotlkmangos
+characters_database_name: wotlkcharacters
+realmd_database_name: wotlkrealmd

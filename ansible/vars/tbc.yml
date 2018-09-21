@@ -1,0 +1,11 @@
+---
+# file: vars/tbc
+install_mysql: true
+
+wow_directory: /vagrant/World of Warcraft
+mangos_directory: /vagrant/mangos-tbc
+db_directory: /vagrant/tbc-db
+
+mangos_database_name: tbcmangos
+characters_database_name: tbccharacters
+realmd_database_name: tbcrealmd

@@ -1,0 +1,12 @@
+---
+# file: vars/classic
+install_mysql: true
+
+wow_directory: /vagrant/World of Warcraft
+mangos_directory: "../../mangos-classic"
+db_directory: "../../classic-db"
+
+mangos_database_name: mangos
+character_database_name: characters
+realmd_database_name: realmd
+

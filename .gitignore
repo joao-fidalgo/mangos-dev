@@ -1,0 +1,5 @@
+.vagrant/
+.vscode/
+ansible/roles/
+ansible/*.retry
+World of Warcraft/
