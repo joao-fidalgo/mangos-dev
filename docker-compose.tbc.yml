@@ -1,0 +1,52 @@
+version: "3.6"
+
+services:
+  mangosd:
+    image: cmangos/mangosd:tbc
+    build:
+      context: ./mangos-tbc
+      dockerfile: ../docker/Dockerfile.dev
+    command:
+      - /bin/sh
+      - -c
+      - |
+          cmake ../.. -DCMAKE_INSTALL_PREFIX=../../run/mangosd -DBUILD_GAME_SERVER=ON -DBUILD_SCRIPTDEV=ON -DBUILD_LOGIN_SERVER=OFF
+          make
+          make install -j ${JOBS:-1}
+          cd /mangos/run/mangosd/bin
+          ./mangosd
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./mangos-tbc:/mangos
+
+  realmd:
+    image: cmangos/realmd:tbc
+    build:
+      context: ./mangos-tbc
+      dockerfile: ../docker/Dockerfile.dev
+    command:
+      - /bin/sh
+      - -c
+      - |
+          cmake ../.. -DCMAKE_INSTALL_PREFIX=-../../../../run/realmd -DBUILD_GAME_SERVER=OFF -DBUILD_SCRIPTDEV=OFF -DBUILD_LOGIN_SERVER=ON
+          make
+          make install -j ${JOBS:-1}
+          cd /mangos/run/realmd/bin
+          ./realmd
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./mangos-tbc:/mangos
+
+  db:
+    image: cmangos/mysqld:tbc
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile.mysqld
+      args:
+        MANGOS_DIRECTORY: mangos-tbc
+        DB_DIRECTORY: tbc-db
+        MANGOS_DATABASE: tbcmangos
+        CHARACTERS_DATABASE: tbccharacters
+        REALMD_DATABASE: tbcrealmd

@@ -1,0 +1,51 @@
+### Stage 1: Build ###
+
+FROM mysql:5.7 as builder
+
+ARG MANGOS_DIRECTORY="mangos-tbc"
+ARG DB_DIRECTORY="tbc-db"
+ARG MANGOS_DATABASE="tbcmangos"
+ARG CHARACTERS_DATABASE="tbccharacters"
+ARG REALMD_DATABASE="tbcrealmd"
+
+RUN ["sed", "-i", "s/exec \"$@\"/echo \"not running $@\"/", "/usr/local/bin/docker-entrypoint.sh"]
+
+ENV MYSQL_ROOT_PASSWORD=root
+
+COPY . .
+
+RUN echo "\
+#!/bin/bash\\n\
+echo \"> /"$MANGOS_DIRECTORY"/sql/create/db_create_mysql.sql\"\\n\
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" < /"$MANGOS_DIRECTORY"/sql/create/db_create_mysql.sql\\n\
+echo \"> /"$MANGOS_DIRECTORY"/sql/base/characters.sql\"\\n\
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$CHARACTERS_DATABASE" < /"$MANGOS_DIRECTORY"/sql/base/characters.sql\\n\
+echo \"> /"$MANGOS_DIRECTORY"/sql/base/mangos.sql\"\\n\
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MANGOS_DATABASE" < /"$MANGOS_DIRECTORY"/sql/base/mangos.sql\\n\
+echo \"> /"$MANGOS_DIRECTORY"/sql/base/realmd.sql\"\\n\
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$REALMD_DATABASE" < /"$MANGOS_DIRECTORY"/sql/base/realmd.sql\\n\
+echo \"> /"$DB_DIRECTORY"/Full_DB/TBCDB_1.7.0_ANewHope.sql\"\\n\
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MANGOS_DATABASE" < /"$DB_DIRECTORY"/Full_DB/TBCDB_1.7.0_ANewHope.sql\\n\
+echo \"> /"$DB_DIRECTORY"/Updates/[0-9]*.sql\"\\n\
+for sql_file in \$(ls /"$DB_DIRECTORY"/Updates/[0-9]*.sql); do echo \"\$sql_file\" && mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MANGOS_DATABASE" < \$sql_file ; done\\n\
+echo \"> /"$DB_DIRECTORY"/Updates/Instances/[0-9]*.sql\"\\n\
+for sql_file in \$(ls /"$DB_DIRECTORY"/Updates/Instances/[0-9]*.sql); do echo \"\$sql_file\" && mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MANGOS_DATABASE" < \$sql_file ; done\\n\
+echo \"> /"$MANGOS_DIRECTORY"/sql/base/dbc/original_data/*.sql\"\\n\
+for sql_file in \$(ls /"$MANGOS_DIRECTORY"/sql/base/dbc/original_data/*.sql); do echo \"\$sql_file\" && mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MANGOS_DATABASE" < \$sql_file ; done\\n\
+echo \"> /"$MANGOS_DIRECTORY"/sql/base/dbc/cmangos_fixes/*.sql\"\\n\
+for sql_file in \$(ls /"$MANGOS_DIRECTORY"/sql/base/dbc/cmangos_fixes/*.sql); do echo \"\$sql_file\" && mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MANGOS_DATABASE" < \$sql_file ; done\\n\
+echo \"> /"$MANGOS_DIRECTORY"/sql/scriptdev2/scriptdev2.sql\"\\n\
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MANGOS_DATABASE" < /"$MANGOS_DIRECTORY"/sql/scriptdev2/scriptdev2.sql\\n\
+echo \"> /"$DB_DIRECTORY"/ACID/acid_tbc.sql\"\\n\
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MANGOS_DATABASE" < /"$DB_DIRECTORY"/ACID/acid_tbc.sql\\n\
+" > /docker-entrypoint-initdb.d/01-initialize-databases.sh
+
+RUN chmod a+x /docker-entrypoint-initdb.d/01-initialize-databases.sh
+
+RUN ["/usr/local/bin/docker-entrypoint.sh", "mysqld", "--datadir", "/initialized-db"]
+
+### Stage 2: Setup ###
+
+FROM mysql:5.7
+
+COPY --from=builder /initialized-db /var/lib/mysql
