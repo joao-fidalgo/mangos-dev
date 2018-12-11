@@ -1,6 +1,6 @@
 [submodule "mangos-tbc"]
 	path = mangos-tbc
-	url = https://github.com/cmangos/mangos-tbc
+	url = https://github.com/joao-fidalgo/mangos-tbc
 [submodule "tbc-db"]
 	path = tbc-db
-	url = https://github.com/cmangos/tbc-db
+	url = https://github.com/joao-fidalgo/tbc-db
