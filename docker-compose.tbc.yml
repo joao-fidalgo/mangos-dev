@@ -4,8 +4,10 @@ services:
   mangosd:
     image: cmangos/mangosd:tbc
     build:
-      context: ./mangos-tbc
-      dockerfile: ../docker/Dockerfile.dev
+      context: ./
+      dockerfile: ./docker/Dockerfile.dev
+      args:
+        MANGOS_DIRECTORY: mangos-tbc
     command:
       - /bin/sh
       - -c
@@ -15,6 +17,8 @@ services:
           make install -j ${JOBS:-1}
           cd /mangos/run/mangosd/bin
           ./mangosd
+    ports:
+      - 8085:8085
     stdin_open: true
     tty: true
     volumes:
@@ -23,8 +27,10 @@ services:
   realmd:
     image: cmangos/realmd:tbc
     build:
-      context: ./mangos-tbc
-      dockerfile: ../docker/Dockerfile.dev
+      context: ./
+      dockerfile: ./docker/Dockerfile.dev
+      args:
+        MANGOS_DIRECTORY: mangos-tbc
     command:
       - /bin/sh
       - -c
@@ -34,6 +40,8 @@ services:
           make install -j ${JOBS:-1}
           cd /mangos/run/realmd/bin
           ./realmd
+    ports:
+      - 3724:3724
     stdin_open: true
     tty: true
     volumes:
@@ -50,3 +58,5 @@ services:
         MANGOS_DATABASE: tbcmangos
         CHARACTERS_DATABASE: tbccharacters
         REALMD_DATABASE: tbcrealmd
+    ports:
+      - 3306:3306
