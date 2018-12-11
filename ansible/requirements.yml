@@ -1,5 +1,0 @@
----
-# file: requirements
-- src: git@github.com:joao-fidalgo/ansible-role-mangos.git
-  scm: git
-  version: master
