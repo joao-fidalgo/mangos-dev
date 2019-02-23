@@ -6,46 +6,49 @@ services:
     build:
       context: ./
       dockerfile: ./docker/Dockerfile.dev
-      args:
-        MANGOS_DIRECTORY: mangos-tbc
     command:
       - /bin/sh
       - -c
       - |
+          mkdir -p /home/mangos/build/mangosd
+          cd /home/mangos/build/mangosd
           cmake ../.. -DCMAKE_INSTALL_PREFIX=../../run/mangosd -DBUILD_GAME_SERVER=ON -DBUILD_SCRIPTDEV=ON -DBUILD_LOGIN_SERVER=OFF
           make
           make install -j ${JOBS:-1}
-          cd /mangos/run/mangosd/bin
+          cd /home/mangos/run/mangosd/bin
+          cp ../etc/mangosd.conf.dist ../etc/mangosd.conf || exit 0
+          cp ../etc/playerbot.conf.dist ../etc/playerbot.conf || exit 0
           ./mangosd
     ports:
       - 8085:8085
     stdin_open: true
     tty: true
     volumes:
-      - ./mangos-tbc:/mangos
+      - ./mangos-tbc:/home/mangos
 
   realmd:
     image: cmangos/realmd:tbc
     build:
       context: ./
       dockerfile: ./docker/Dockerfile.dev
-      args:
-        MANGOS_DIRECTORY: mangos-tbc
     command:
       - /bin/sh
       - -c
       - |
+          mkdir -p /home/mangos/build/realmd
+          cd /home/mangos/build/realmd
           cmake ../.. -DCMAKE_INSTALL_PREFIX=-../../../../run/realmd -DBUILD_GAME_SERVER=OFF -DBUILD_SCRIPTDEV=OFF -DBUILD_LOGIN_SERVER=ON
           make
           make install -j ${JOBS:-1}
-          cd /mangos/run/realmd/bin
+          cd /home/mangos/run/realmd/bin
+          cp ../etc/realmd.conf.dist ../etc/realmd.conf || exit 0
           ./realmd
     ports:
       - 3724:3724
     stdin_open: true
     tty: true
     volumes:
-      - ./mangos-tbc:/mangos
+      - ./mangos-tbc:/home/mangos
 
   db:
     image: cmangos/mysqld:tbc
