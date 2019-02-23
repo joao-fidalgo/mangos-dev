@@ -16,8 +16,8 @@ services:
           make
           make install -j ${JOBS:-1}
           cd /home/mangos/run/mangosd/bin
-          cp ../etc/mangosd.conf.dist ../etc/mangosd.conf || exit 0
-          cp ../etc/playerbot.conf.dist ../etc/playerbot.conf || exit 0
+          yes n | cp -i ../etc/mangosd.conf.dist ../etc/mangosd.conf
+          yes n | cp -i ../etc/playerbot.conf.dist ../etc/playerbot.conf
           ./mangosd
     ports:
       - 8085:8085
@@ -41,7 +41,7 @@ services:
           make
           make install -j ${JOBS:-1}
           cd /home/mangos/run/realmd/bin
-          cp ../etc/realmd.conf.dist ../etc/realmd.conf || exit 0
+          yes n | cp -i ../etc/realmd.conf.dist ../etc/realmd.conf
           ./realmd
     ports:
       - 3724:3724
